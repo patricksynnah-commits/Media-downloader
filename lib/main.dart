@@ -1,106 +1,119 @@
 import 'package:flutter/material.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
+void main() {
+  runApp(const MediaDownloaderApp());
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  final TextEditingController urlController = TextEditingController();
+class MediaDownloaderApp extends StatelessWidget {
+  const MediaDownloaderApp({super.key});
 
-  String selectedType = 'video';
-  String selectedQuality = '720p';
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Media Downloader',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const HomePage(),
+    );
+  }
+}
 
-  final List<String> videoQualities = [
-    '144p',
-    '360p',
-    '720p',
-    '1080p'
-  ];
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
-  final List<String> audioQualities = [
-    '128kbps',
-    '192kbps',
-    '320kbps'
-  ];
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
 
-  double progress = 0.0;
+class _HomePageState extends State<HomePage> {
+  final TextEditingController urlController =
+      TextEditingController();
+
+  String downloadType = "Video";
+  String quality = "720p";
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Media Downloader'),
+        title: const Text("Media Downloader"),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+
         child: Column(
           children: [
+
             TextField(
               controller: urlController,
-              decoration: InputDecoration(
-                hintText: 'Paste media link here',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+
+              decoration: const InputDecoration(
+                labelText: "Paste YouTube Link",
+                border: OutlineInputBorder(),
               ),
             ),
 
             const SizedBox(height: 20),
 
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        selectedType = 'video';
-                        selectedQuality = '720p';
-                      });
-                    },
-                    child: const Text('Download Video'),
-                  ),
+            DropdownButtonFormField<String>(
+              value: downloadType,
+
+              items: const [
+                DropdownMenuItem(
+                  value: "Video",
+                  child: Text("Download Video"),
                 ),
 
-                const SizedBox(width: 10),
-
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        selectedType = 'audio';
-                        selectedQuality = '128kbps';
-                      });
-                    },
-                    child: const Text('Convert to MP3'),
-                  ),
+                DropdownMenuItem(
+                  value: "MP3",
+                  child: Text("Convert to MP3"),
                 ),
               ],
+
+              onChanged: (value) {
+                setState(() {
+                  downloadType = value!;
+                });
+              },
+
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+              ),
             ),
 
             const SizedBox(height: 20),
 
             DropdownButtonFormField<String>(
-              value: selectedQuality,
-              items: (selectedType == 'video'
-                      ? videoQualities
-                      : audioQualities)
-                  .map((quality) {
-                return DropdownMenuItem(
-                  value: quality,
-                  child: Text(quality),
-                );
-              }).toList(),
+              value: quality,
+
+              items: const [
+                DropdownMenuItem(
+                  value: "360p",
+                  child: Text("360p"),
+                ),
+
+                DropdownMenuItem(
+                  value: "720p",
+                  child: Text("720p"),
+                ),
+
+                DropdownMenuItem(
+                  value: "1080p",
+                  child: Text("1080p"),
+                ),
+              ],
+
               onChanged: (value) {
                 setState(() {
-                  selectedQuality = value!;
+                  quality = value!;
                 });
               },
+
               decoration: const InputDecoration(
-                labelText: 'Select Quality',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -109,57 +122,29 @@ class _HomeScreenState extends State<HomeScreen> {
 
             SizedBox(
               width: double.infinity,
-              height: 55,
+
+              height: 50,
+
               child: ElevatedButton(
                 onPressed: () {
-                  startDownload();
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        "Download feature will be connected later",
+                      ),
+                    ),
+                  );
                 },
+
                 child: const Text(
-                  'Download',
-                  style: TextStyle(fontSize: 18),
+                  "Download",
                 ),
               ),
-            ),
-
-            const SizedBox(height: 30),
-
-            LinearProgressIndicator(
-              value: progress,
             ),
           ],
         ),
       ),
     );
-  }
-
-  void startDownload() {
-    final url = urlController.text.trim();
-
-    if (url.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a valid URL'),
-        ),
-      );
-      return;
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Starting $selectedType download in $selectedQuality quality',
-        ),
-      ),
-    );
-
-    setState(() {
-      progress = 0.5;
-    });
-
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() {
-        progress = 1.0;
-      });
-    });
   }
 }
